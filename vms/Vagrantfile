@@ -1,15 +1,17 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-Vagrant::Config.run do |config|
+Vagrant.configure("2") do |config|
   config.vm.box = "precise64"
   config.vm.box_url = "http://files.vagrantup.com/precise64.box"
-  config.vm.forward_port 9292, 9292
-  config.vm.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
-  config.vm.share_folder "app", "/opt/app", ".."
+  config.vm.network "forwarded_port", guest: 9292, host: 9292
+  config.vm.synced_folder "..", "/opt/app"
   config.vm.provision :puppet do |puppet|
     puppet.manifests_path = "manifests"
     puppet.module_path    = "modules"
     puppet.manifest_file  = "default.pp"
+  end
+  config.vm.provider "virtualbox" do |v|
+    v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
   end
 end
